@@ -36,8 +36,6 @@ fetch('polygons.geojson')
             style: function(feature) {
                 return {
                     color: 'blue',
-                    fillColor: 'lightblue',
-                    fillOpacity: 0.5,
                     weight: 2
                 };
             },
