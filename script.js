@@ -1,4 +1,4 @@
-// Inicializar el mapa
+﻿// Inicializar el mapa
 var map = L.map('map').setView([-27.2, -58.0], 10); // Centro aproximado basado en las coordenadas del shapefile
 
 // Añadir capa de mapa base (OpenStreetMap)
