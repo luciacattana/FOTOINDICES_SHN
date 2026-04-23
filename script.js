@@ -22,7 +22,7 @@ L.control.layers(baseMaps).addTo(map);
 var info= L.control();
 info.onAdd = function (map) {
     this._div = L.DomUtil.create('div', 'info');
-    this._div.innerHTML = '<h4>FOTOINDICE SIHN </h4>'
+    this._div.innerHTML = '<h4>FOTOINDICES SIHN </h4>'
     return this._div;
 };
 info.addTo(map);
@@ -46,16 +46,10 @@ fetch('polygons.geojson')
                 var infoTitle = feature.properties.OBSERVACIO || 'N/A';
                 var imageName = feature.properties.IMAGEN || feature.properties.FOTOINDICE || feature.properties.FOTOINDEX;
                 
-                // Buscar primero con el nombre del IMAGEN, luego convertir espacios a guiones
                 var imagePath = '';
                 if (imageName) {
-                    var baseImageName = encodeURI(imageName.trim());
-                    var imagePathPNG = 'images/' + baseImageName;
-                    var imagePathTIF = 'images/' + baseImageName.replace(/\.png$/i, '.tif');
-                    var imagePathWithSpaces = 'images/' + imageName.replace(/_/g, ' ').trim();
-                    
-                    // Preferencia: PNG > TIF > con espacios
-                    imagePath = imagePathPNG;
+                    imageName = imageName.trim();
+                    imagePath = 'images/' + imageName;
                 }
 
                 var popupContent = '<div style="max-width: 300px;">' +
@@ -98,19 +92,32 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
         map.removeLayer(currentImageOverlay);
     }
 
-    // Intentar diferentes variantes del nombre de archivo
-    var pathsToTry = [
-        imagePath, // PNG con guiones
-        imagePath.replace(/\.png$/i, '.tif'), // Variante TIF
-        imagePath.replace(/_/g, ' '), // Con espacios en lugar de guiones
-        'images/' + originalName.replace(/\.png$/i, '.tif'), // Nombre original con TIF
-    ];
+    var rawName = originalName ? originalName.trim() : '';
+    var upperPrefixName = rawName.replace(/^([a-z])/i, function(match) {
+        return match.toUpperCase();
+    });
 
-    // Función para intentar cargar la imagen
+    var candidates = [
+        rawName,
+        rawName.replace(/\.png$/i, '.tif'),
+        rawName.replace(/_/g, ' '),
+        rawName.replace(/\.png$/i, '.tif').replace(/_/g, ' '),
+        upperPrefixName,
+        upperPrefixName.replace(/\.png$/i, '.tif'),
+        upperPrefixName.replace(/_/g, ' '),
+        upperPrefixName.replace(/\.png$/i, '.tif').replace(/_/g, ' ')
+    ].filter(function(name) {
+        return name && name.length > 0;
+    });
+
+    var pathsToTry = candidates.map(function(name) {
+        return 'images/' + encodeURI(name);
+    });
+
     function tryLoadImage(pathIndex) {
         if (pathIndex >= pathsToTry.length) {
             console.warn('No se pudo cargar la imagen. Rutas intentadas:');
-            pathsToTry.forEach(p => console.warn(' -', p));
+            pathsToTry.forEach(function(p) { console.warn(' -', p); });
             alert('No se pudo encontrar la imagen para este polígono.');
             return;
         }
@@ -118,19 +125,16 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
         var testPath = pathsToTry[pathIndex];
         var img = new Image();
         img.onload = function() {
-            // La imagen cargó correctamente
             currentImageOverlay = L.imageOverlay(testPath, bounds, {
                 opacity: 1.0,
                 interactive: true,
                 zIndex: 500
             }).addTo(map);
 
-            // Asegurar que la imagen esté encima
             if (currentImageOverlay._image) {
                 currentImageOverlay._image.style.zIndex = '500';
             }
 
-            // Crear control para cerrar el overlay
             var closeButton = L.control({ position: 'topright' });
             closeButton.onAdd = function(map) {
                 var div = L.DomUtil.create('div', 'close-overlay-btn');
@@ -149,7 +153,6 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
             console.log('Imagen cargada:', testPath);
         };
         img.onerror = function() {
-            // La imagen no existe, intentar la siguiente variante
             tryLoadImage(pathIndex + 1);
         };
         img.src = testPath;
