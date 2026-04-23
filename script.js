@@ -44,7 +44,7 @@ fetch('polygons.geojson')
             onEachFeature: function(feature, layer) {
                 // Crear popup con información del polígono
                 var infoTitle = feature.properties.OBSERVACIO || 'N/A';
-                var imageName = feature.properties.IMAGEN || feature.properties.FOTOINDICE || feature.properties.FOTOINDEX;
+                var imageName = feature.properties.FOTOINDEX || feature.properties.IMAGEN || feature.properties.FOTOINDICE || feature.properties.Path_Photo;
                 
                 var imagePath = '';
                 if (imageName) {
@@ -93,26 +93,51 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
     }
 
     var rawName = originalName ? originalName.trim() : '';
-    var upperPrefixName = rawName.replace(/^([a-z])/i, function(match) {
-        return match.toUpperCase();
-    });
+    var nameWithUnderscores = rawName.replace(/ /g, '_');
+    var nameWithSpaces = rawName.replace(/_/g, ' ');
 
-    var candidates = [
+    var candidateNames = [
         rawName,
-        rawName.replace(/\.png$/i, '.tif'),
-        rawName.replace(/_/g, ' '),
-        rawName.replace(/\.png$/i, '.tif').replace(/_/g, ' '),
-        upperPrefixName,
-        upperPrefixName.replace(/\.png$/i, '.tif'),
-        upperPrefixName.replace(/_/g, ' '),
-        upperPrefixName.replace(/\.png$/i, '.tif').replace(/_/g, ' ')
+        nameWithUnderscores,
+        nameWithSpaces,
+        rawName.toUpperCase(),
+        rawName.toLowerCase(),
+        nameWithUnderscores.toUpperCase(),
+        nameWithUnderscores.toLowerCase(),
+        nameWithSpaces.toUpperCase(),
+        nameWithSpaces.toLowerCase()
     ].filter(function(name) {
         return name && name.length > 0;
+    });
+
+    var candidates = [];
+    candidateNames.forEach(function(name) {
+        if (candidates.indexOf(name) === -1) {
+            candidates.push(name);
+        }
+    });
+
+    candidateNames.forEach(function(name) {
+        if (/\.png$/i.test(name)) {
+            var tifName = name.replace(/\.png$/i, '.tif');
+            if (candidates.indexOf(tifName) === -1) candidates.push(tifName);
+
+            var lowerPng = name.replace(/\.png$/i, '.png');
+            if (candidates.indexOf(lowerPng) === -1) candidates.push(lowerPng);
+        }
+        if (/\.tif$/i.test(name)) {
+            var pngName = name.replace(/\.tif$/i, '.png');
+            if (candidates.indexOf(pngName) === -1) candidates.push(pngName);
+
+            var lowerTif = name.replace(/\.tif$/i, '.tif');
+            if (candidates.indexOf(lowerTif) === -1) candidates.push(lowerTif);
+        }
     });
 
     var pathsToTry = candidates.map(function(name) {
         return 'images/' + encodeURI(name);
     });
+    console.log('Intentando cargar imagenes:', pathsToTry);
 
     function tryLoadImage(pathIndex) {
         if (pathIndex >= pathsToTry.length) {
