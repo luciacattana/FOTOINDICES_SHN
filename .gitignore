@@ -1,0 +1,15 @@
+# Ignorar archivos generados y temporales
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Ignorar TIFFs grandes que no deben subirse a GitHub
+/images/*.tif
+/images/*.tiff
+/1/images/*.tif
+/1/images/*.tiff

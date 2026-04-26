@@ -36,17 +36,20 @@ fetch('polygons.geojson')
             style: function(feature) {
                 return {
                     color: 'blue',
+                    fillColor: 'lightblue',
+                    fillOpacity: 0,
                     weight: 2
                 };
             },
             onEachFeature: function(feature, layer) {
                 // Crear popup con información del polígono
                 var infoTitle = feature.properties.OBSERVACIO || 'N/A';
-                var imageName = feature.properties.FOTOINDEX || feature.properties.IMAGEN || feature.properties.FOTOINDICE || feature.properties.Path_Photo;
+                var imageName = feature.properties.IMAGEN || feature.properties.FOTOINDEX || feature.properties.FOTOINDICE || feature.properties.Path_Photo;
                 
                 var imagePath = '';
                 if (imageName) {
                     imageName = imageName.trim();
+                    imageName = imageName.replace(/^.*[\\/]/, '');
                     imagePath = 'images/' + imageName;
                 }
 
@@ -57,7 +60,7 @@ fetch('polygons.geojson')
                                    '<strong>PROVINCIA:</strong> ' + (feature.properties.PROVINCIA || 'N/A') + '<br>' +
                                    '<strong>LOCALIDAD:</strong> ' + (feature.properties.LOCALIDAD || 'N/A') + '<br>' +
                                    '<strong>ESCALA:</strong> ' + (feature.properties.ESCALA || 'N/A') + '<br>' +
-                                   '<strong>FOTOINDEX:</strong> ' + infoTitle + '<br>' +
+                                   '<strong>FOTOINDICE:</strong> ' + infoTitle + '<br>' +
                                    '<em style="color: #666; font-size: 12px;">Haz clic en el polígono para ver la imagen</em>' +
                                    '</div>';
 
@@ -91,57 +94,57 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
     }
 
     var rawName = originalName ? originalName.trim() : '';
-    var nameWithUnderscores = rawName.replace(/ /g, '_');
-    var nameWithSpaces = rawName.replace(/_/g, ' ');
+    var cleanedName = rawName.replace(/^.*[\\/]/, '').trim();
 
-    var candidateNames = [
-        rawName,
-        nameWithUnderscores,
-        nameWithSpaces,
-        rawName.toUpperCase(),
-        rawName.toLowerCase(),
-        nameWithUnderscores.toUpperCase(),
-        nameWithUnderscores.toLowerCase(),
-        nameWithSpaces.toUpperCase(),
-        nameWithSpaces.toLowerCase()
-    ].filter(function(name) {
-        return name && name.length > 0;
-    });
+    function addCandidate(list, name) {
+        if (!name || name.length === 0) return;
+        if (list.indexOf(name) === -1) list.push(name);
+    }
 
-    var candidates = [];
-    candidateNames.forEach(function(name) {
-        if (candidates.indexOf(name) === -1) {
-            candidates.push(name);
-        }
-    });
+    var candidateNames = [];
+    addCandidate(candidateNames, cleanedName);
+    addCandidate(candidateNames, cleanedName.replace(/ /g, '_'));
+    addCandidate(candidateNames, cleanedName.replace(/_/g, ' '));
+    addCandidate(candidateNames, cleanedName.toUpperCase());
+    addCandidate(candidateNames, cleanedName.toLowerCase());
+    addCandidate(candidateNames, cleanedName.replace(/ /g, '_').toUpperCase());
+    addCandidate(candidateNames, cleanedName.replace(/ /g, '_').toLowerCase());
+    addCandidate(candidateNames, cleanedName.replace(/_/g, ' ').toUpperCase());
+    addCandidate(candidateNames, cleanedName.replace(/_/g, ' ').toLowerCase());
 
     candidateNames.forEach(function(name) {
-        if (/\.png$/i.test(name)) {
-            var tifName = name.replace(/\.png$/i, '.tif');
-            if (candidates.indexOf(tifName) === -1) candidates.push(tifName);
-
-            var lowerPng = name.replace(/\.png$/i, '.png');
-            if (candidates.indexOf(lowerPng) === -1) candidates.push(lowerPng);
-        }
-        if (/\.tif$/i.test(name)) {
-            var pngName = name.replace(/\.tif$/i, '.png');
-            if (candidates.indexOf(pngName) === -1) candidates.push(pngName);
-
-            var lowerTif = name.replace(/\.tif$/i, '.tif');
-            if (candidates.indexOf(lowerTif) === -1) candidates.push(lowerTif);
+        if (!/\.(png|tif)$/i.test(name)) {
+            addCandidate(candidateNames, name + '.png');
+            addCandidate(candidateNames, name + '.tif');
+        } else {
+            addCandidate(candidateNames, name.replace(/\.(png|tif)$/i, '.png'));
+            addCandidate(candidateNames, name.replace(/\.(png|tif)$/i, '.tif'));
         }
     });
 
-    var pathsToTry = candidates.map(function(name) {
-        return 'images/' + encodeURI(name);
+    var foldersToSearch = ['images', '1/images'];
+    var pathsToTry = [];
+    foldersToSearch.forEach(function(folder) {
+        candidateNames.forEach(function(name) {
+            var path = folder + '/' + encodeURI(name);
+            if (pathsToTry.indexOf(path) === -1) {
+                pathsToTry.push(path);
+            }
+        });
     });
+
     console.log('Intentando cargar imagenes:', pathsToTry);
 
     function tryLoadImage(pathIndex) {
         if (pathIndex >= pathsToTry.length) {
             console.warn('No se pudo cargar la imagen. Rutas intentadas:');
             pathsToTry.forEach(function(p) { console.warn(' -', p); });
-            alert('No se pudo encontrar la imagen para este polígono.');
+            var hasTiffCandidate = pathsToTry.some(function(p) { return /\.tif$/i.test(p); });
+            if (hasTiffCandidate) {
+                alert('No se pudo mostrar la imagen en el mapa. Es posible que exista solo en formato TIFF, el cual no siempre se renderiza en el navegador. Verifique el archivo en la carpeta images o conviértalo a PNG.');
+            } else {
+                alert('No se pudo encontrar la imagen para este polígono.');
+            }
             return;
         }
 
