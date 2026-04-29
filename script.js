@@ -139,12 +139,40 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
         if (pathIndex >= pathsToTry.length) {
             console.warn('No se pudo cargar la imagen. Rutas intentadas:');
             pathsToTry.forEach(function(p) { console.warn(' -', p); });
-            var hasTiffCandidate = pathsToTry.some(function(p) { return /\.tif$/i.test(p); });
-            if (hasTiffCandidate) {
-                alert('No se pudo mostrar la imagen en el mapa. Es posible que exista solo en formato TIFF, el cual no siempre se renderiza en el navegador. Verifique el archivo en la carpeta images o conviértalo a PNG.');
-            } else {
-                alert('No se pudo encontrar la imagen para este polígono.');
+
+            var placeholderSVG = '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">' +
+                '<rect width="100%" height="100%" fill="#222" />' +
+                '<text x="50%" y="45%" fill="#fff" font-size="48" font-family="Arial,Helvetica,sans-serif" text-anchor="middle">Imagen no disponible</text>' +
+                '<text x="50%" y="55%" fill="#ccc" font-size="28" font-family="Arial,Helvetica,sans-serif" text-anchor="middle">La imagen original no está en GitHub</text>' +
+                '</svg>';
+            var placeholderUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(placeholderSVG);
+
+            currentImageOverlay = L.imageOverlay(placeholderUrl, bounds, {
+                opacity: 0.95,
+                interactive: true,
+                zIndex: 500
+            }).addTo(map);
+
+            if (currentImageOverlay._image) {
+                currentImageOverlay._image.style.zIndex = '500';
             }
+
+            var closeButton = L.control({ position: 'topright' });
+            closeButton.onAdd = function(map) {
+                var div = L.DomUtil.create('div', 'close-overlay-btn');
+                div.innerHTML = '<button style="padding: 10px 15px; background-color: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">✕ Cerrar imagen</button>';
+                div.onclick = function() {
+                    if (currentImageOverlay) {
+                        map.removeLayer(currentImageOverlay);
+                        currentImageOverlay = null;
+                    }
+                    map.removeControl(closeButton);
+                };
+                return div;
+            };
+            closeButton.addTo(map);
+
+            alert('No se encontró la imagen original para este polígono en GitHub. Se muestra un marcador de posición.');
             return;
         }
 
