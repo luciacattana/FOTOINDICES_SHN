@@ -95,6 +95,10 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
 
     var rawName = originalName ? originalName.trim() : '';
     var cleanedName = rawName.replace(/^.*[\\/]/, '').trim();
+    cleanedName = cleanedName.replace(/\s+/g, ' ').trim();
+    if (cleanedName.normalize) {
+        cleanedName = cleanedName.normalize('NFC');
+    }
 
     function addCandidate(list, name) {
         if (!name || name.length === 0) return;
@@ -102,31 +106,25 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
     }
 
     var candidateNames = [];
-    addCandidate(candidateNames, cleanedName);
-    addCandidate(candidateNames, cleanedName.replace(/ /g, '_'));
-    addCandidate(candidateNames, cleanedName.replace(/_/g, ' '));
-    addCandidate(candidateNames, cleanedName.toUpperCase());
-    addCandidate(candidateNames, cleanedName.toLowerCase());
-    addCandidate(candidateNames, cleanedName.replace(/ /g, '_').toUpperCase());
-    addCandidate(candidateNames, cleanedName.replace(/ /g, '_').toLowerCase());
-    addCandidate(candidateNames, cleanedName.replace(/_/g, ' ').toUpperCase());
-    addCandidate(candidateNames, cleanedName.replace(/_/g, ' ').toLowerCase());
+    var baseName = cleanedName.replace(/\.(png|tif)$/i, '');
+    var variants = [
+        baseName,
+        baseName.replace(/ /g, '_'),
+        baseName.replace(/_/g, ' '),
+        baseName.toUpperCase(),
+        baseName.toLowerCase()
+    ];
 
-    candidateNames.forEach(function(name) {
-        if (!/\.(png|tif)$/i.test(name)) {
-            addCandidate(candidateNames, name + '.png');
-            addCandidate(candidateNames, name + '.tif');
-        } else {
-            addCandidate(candidateNames, name.replace(/\.(png|tif)$/i, '.png'));
-            addCandidate(candidateNames, name.replace(/\.(png|tif)$/i, '.tif'));
-        }
+    variants.forEach(function(variant) {
+        addCandidate(candidateNames, variant + '.png');
+        addCandidate(candidateNames, variant + '.tif');
     });
 
     var foldersToSearch = ['images', '1/images'];
     var pathsToTry = [];
     foldersToSearch.forEach(function(folder) {
         candidateNames.forEach(function(name) {
-            var path = folder + '/' + encodeURI(name);
+            var path = folder + '/' + encodeURIComponent(name).replace(/%2F/g, '/');
             if (pathsToTry.indexOf(path) === -1) {
                 pathsToTry.push(path);
             }
