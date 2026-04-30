@@ -117,7 +117,7 @@ function createGeoJsonLayer(data) {
                                '<strong>LOCALIDAD:</strong> ' + (feature.properties.LOCALIDAD || 'N/A') + '<br>' +
                                '<strong>ESCALA:</strong> ' + (feature.properties.ESCALA || 'N/A') + '<br>' +
                                '<strong>FOTOINDICE:</strong> ' + infoTitle + '<br>' +
-                               '<em style="color: #666; font-size: 12px;">Haz clic en el polígono para ver la imagen</em>' +
+                               '<em style="color: #666; font-size: 12px;">La imagen se cargará en unos segundos</em>' +
                                '</div>';
 
             layer.bindPopup(popupContent);
