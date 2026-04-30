@@ -30,7 +30,7 @@
     top: 30px;
     right: 30px;
     color: white;
-    font-size: 40px;
+    font-size: 24px;
     font-weight: bold;
     cursor: pointer;
     z-index: 10000;
@@ -52,14 +52,20 @@
     text-align: center;
     margin-top: 20px;
     max-width: 90%;
-    font-size: 14px;
+    font-size: 10px;
     line-height: 1.6;
 }
 
 /* Botón para cerrar overlay georreferenciado */
+.close-overlay-btn {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .close-overlay-btn button {
+    width: 160px;
     padding: 10px 15px;
-    background-color: #ff4444;
     color: white;
     border: none;
     border-radius: 4px;
@@ -68,15 +74,253 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-.close-overlay-btn button:hover {
+.close-overlay-btn .close-btn {
+    background-color: #ff4444;
+}
+
+.close-overlay-btn .close-btn:hover {
     background-color: #cc0000;
+}
+
+.close-overlay-btn .download-btn {
+    background-color: #28a745;
+}
+
+.close-overlay-btn .download-btn:hover {
+    background-color: #1e7e34;
 }
 
 /* Estilo para el control de información del mapa */
 .info {
-    background-color: white;
-    padding: 10px;
+    background-color: rgb(255, 255, 255);
+    padding: 0px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     font-family: Arial, sans-serif;
+    
+}
+
+.footer-panel {
+    position: fixed;
+    left: 10px;
+    top: 10px;
+    z-index: 5000;
+    width: 170px;
+    background-color: rgb(255, 255, 255);
+    color: #0f0e0e;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.35);
+    padding: 14px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    line-height: 1;
+    font-size: 9px;
+}
+
+.footer-panel-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.footer-panel-content div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.footer-title,
+.footer-subtitle {
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+
+.footer-panel-2 {
+    position: fixed;
+    right: 60px;
+    bottom: 18px;
+    z-index: 5000;
+    max-width: 320px;
+    background-color: rgb(248, 245, 245);
+    color: #0f0e0e;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.35);
+    padding: 4px 4px;
+    font-family: Arial, sans-serif;
+    line-height: 1;
+    font-size: 9px;
+}
+
+.footer-panel-2-content {
+    display: flex;
+    flex-direction: column-wise;
+    gap: 4px;
+}
+
+.footer-panel-2-content div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.footer-panel-3 {
+    position: fixed;
+    right: 20px;
+    bottom: 10px;
+    z-index: 5000;
+    width: auto;
+    background-color: transparent;
+    color: #0f0e0e;
+    border-radius: 12px;
+    box-shadow: none;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    line-height: 1.4;
+    font-size: 12px;
+}
+
+.footer-panel-3.open {
+    width: 300px;
+    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.35);
+    padding: 10px;
+}
+
+.footer-panel-3-toggle {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    display: block;
+    margin-bottom: 0;
+}
+
+.footer-panel-3-content {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.footer-panel-3.open .footer-panel-3-content {
+    display: flex;
+}
+
+.footer-panel-3-content div {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: initial;
+}
+
+.footer-panel-3-content strong {
+    font-weight: bold;
+}
+
+
+.filter-panel {
+    position: fixed;
+    top: 120px;
+    left: 10px;
+    width: 170px;
+    z-index: 6000;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    padding: 13px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.filter-group {
+    margin-bottom: 10px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 10px;
+    color: #333;
+}
+
+.filter-panel select {
+    width: 100%;
+    padding: 8px 8px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    background: white;
+    color: #111;
+    font-size: 9px;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.filter-actions button {
+    flex: 1;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+.filter-actions button.apply {
+    background-color: #007bff;
+}
+
+.filter-actions button.clear {
+    background-color: #6c757d;
+}
+.leaflet-control-zoom {
+   position: fixed;
+    top: 60px;
+    right: 10px;
+    z-index: 6000;
+    font-family: Arial, sans-serif; */
+ }
+
+.leaflet-control-layers {
+  position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 6000;
+    font-family: Arial, sans-serif; */
+ } 
+ /* CONTROLA LAS CAPAS DE LAS IMAGENES O OSM */
+.leaflet-control-layers .leaflet-control-layers-toggle {
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    color: #111;
+    padding: 10px 14px;
+    cursor: pointer;
+    max-width: 20px;
+    max-height: 20px;
+    text-align: left;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+}
+.leaflet-control-dropdown-layers {
+    display: none;
+    position: absolute;
+    right: 0;
+    bottom: 100%;
+    margin-top: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
 }

@@ -9,7 +9,78 @@
 </head>
 <body>
     <div id="map"></div>
-    
+
+    <div class="filter-panel">
+        <h3>FILTROS</h3>
+        <div class="filter-group">
+            <label for="filterSector">Zona</label>
+            <select id="filterSector">
+                <option value="all">Todas</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filterProvincia">Provincia</label>
+            <select id="filterProvincia">
+                <option value="all">Todas</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filterYear">Año de vuelo</label>
+            <select id="filterYear">
+                <option value="all">Todos</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filterVuelo">Vuelo</label>
+            <select id="filterVuelo">
+                <option value="all">Todos</option>
+            </select>
+        </div>
+        <div class="filter-actions">
+            <button id="applyFilters" type="button" class="apply">Aplicar</button>
+            <button id="clearFilters" type="button" class="clear">Limpiar</button>
+        </div>
+    </div>
+
+    <div class="footer-panel">
+        <div class="footer-panel-content">
+            <div class="footer-title">FOTOINDICES AEREOS</div>
+            <div class="footer-subtitle">(1963-1999)</div>
+            <div>MINISTERIO DE DEFENSA</div>
+            <div>SERVICIO DE HIDROGRAFÍA NAVAL</div>
+            <div>DEPARTAMENTO HIDROGRAFÍA</div>
+            <div>- DIVISIÓN FOTOGRAMETRÍA -</div>
+            
+        </div>
+    </div>
+
+    <div class="footer-panel-2">
+        <div class="footer-panel-2-content">
+            <div>AUTORES: </div>
+            <div>TF Lic. Lucia Cattana;</div>
+            <div>Lic. Fernando Campos</div>
+        </div>
+    </div>
+
+    <div class="footer-panel-3" id="footerPanel3">
+        <button class="footer-panel-3-toggle" type="button" onclick="toggleFooterPanel3()">i</button>
+        <div class="footer-panel-3-content" id="footerPanel3Content">
+            <div style="font-size:10px; font-weight:bold;">DIVISION FOTOGRAMETRIA</div>
+            <div style="font-size:9px;"><strong>JEFE DE DIVISION:</strong> TF Lic. Lucia Cattana</div>
+            <div style="font-size:9px;"><strong>GIS Y GEOREFERENCIACION:</strong> Lic. Fernando Campos</div>
+             <div style="font-size:9px;"><strong>FOTOTECA Y MATERIAL IMPRESO:</strong> 
+            <div>   SISH Walter Falcon</div>
+            <div>   CPSH Malcom Salasar</div>
+            <div>   CPSH Sofia Fajina</div>
+            <div>   AGCV Federico Mateos</div>
+            <div style="font-size:9px;"><strong>informacion del proyecto:</strong> 
+                <div style="font-size:9px;">El presente material es el resultado de la digitalización de fotoindices impresos y su posterior georreferenciación mediante el software de código abierto QGIS. En virtud de la naturaleza del insumo original y de las metodologías empleadas, pueden presentarse deformaciones geométricas y/o desfasajes residuales respecto de las coordenadas reales.
+
+El conjunto de datos corresponde a fotoíndices de campañas aerofotogramétricas ejecutadas por el Servicio de Hidrografía Naval (SHN), así como por otras instituciones. Parte de las imágenes se encuentra disponible en formato papel, mientras que otras únicamente se conservan en soporte analógico (rollos de acetato).
+
+        </div>
+    </div>
+
     <!-- Overlay para mostrar imagen -->
     <div id="image-overlay" class="overlay">
         <span class="overlay-close">&times;</span>
