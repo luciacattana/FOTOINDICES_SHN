@@ -284,6 +284,17 @@
 .filter-actions button.clear {
     background-color: #6c757d;
 }
+
+.range-value {
+    margin-top: 4px;
+    font-size: 10px;
+    color: #333;
+}
+
+.range-value span {
+    font-weight: bold;
+}
+
 .leaflet-control-zoom {
    position: fixed;
     top: 60px;

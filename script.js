@@ -36,6 +36,8 @@ var currentFilters = {
     year: 'all',
     vuelo: 'all'
 };
+var imageOverlayOpacity = 1.0;
+var transparentImageFolder = 'images_transparent';
 
 function getUniqueValues(propName, normalizeFn) {
     if (!allGeoJsonData) return [];
@@ -93,7 +95,7 @@ function createGeoJsonLayer(data) {
             return {
                 color: 'BLUE',
                 fillColor: 'LIGHTBLUE',
-                fillOpacity: 0.051,
+                fillOpacity: 0.0,
                 weight: 1
             };
         },
@@ -200,6 +202,25 @@ fetch('polygons.geojson')
                 applyGeoJsonFilter(currentFilters);
             });
         }
+
+        var opacityRange = document.getElementById('imageOpacityRange');
+        var opacityValue = document.getElementById('imageOpacityValue');
+        if (opacityRange) {
+            opacityRange.addEventListener('input', function() {
+                var opacity = parseFloat(this.value);
+                if (!isNaN(opacity)) {
+                    imageOverlayOpacity = opacity;
+                    if (opacityValue) {
+                        opacityValue.textContent = Math.round(opacity * 100);
+                    }
+                    imageOverlays.forEach(function(overlay) {
+                        if (overlay && typeof overlay.setOpacity === 'function') {
+                            overlay.setOpacity(imageOverlayOpacity);
+                        }
+                    });
+                }
+            });
+        }
     })
     .catch(error => {
         console.error('Error cargando el GeoJSON:', error);
@@ -229,16 +250,20 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
         baseName,
         baseName.replace(/ /g, '_'),
         baseName.replace(/_/g, ' '),
+        baseName.replace(/-/g, ' '),
+        baseName.replace(/ /g, '-'),
         baseName.toUpperCase(),
         baseName.toLowerCase()
     ];
 
     variants.forEach(function(variant) {
         addCandidate(candidateNames, variant + '.png');
+        addCandidate(candidateNames, variant + '.PNG');
         addCandidate(candidateNames, variant + '.tif');
+        addCandidate(candidateNames, variant + '.TIF');
     });
 
-    var foldersToSearch = ['images', '1/images'];
+    var foldersToSearch = [transparentImageFolder, 'images', '1/images'];
     var pathsToTry = [];
     foldersToSearch.forEach(function(folder) {
         candidateNames.forEach(function(name) {
@@ -249,8 +274,12 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
         });
     });
 
+    function isRenderableImage(path) {
+        return /\.(png|jpg|jpeg)$/i.test(path);
+    }
+
     var tifDownloadUrl = pathsToTry.find(function(path) {
-        return /\.tif$/i.test(path);
+        return /\.(tif|TIF)$/i.test(path);
     }) || null;
 
     console.log('Intentando cargar imagenes:', pathsToTry);
@@ -263,12 +292,12 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
             var placeholderSVG = '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">' +
                 '<rect width="100%" height="100%" fill="#222" />' +
                 '<text x="50%" y="45%" fill="#fff" font-size="48" font-family="Arial,Helvetica,sans-serif" text-anchor="middle">Imagen no disponible</text>' +
-                '<text x="50%" y="55%" fill="#ccc" font-size="28" font-family="Arial,Helvetica,sans-serif" text-anchor="middle">La imagen original no está en GitHub</text>' +
+                '<text x="50%" y="55%" fill="#ccc" font-size="28" font-family="Arial,Helvetica,sans-serif" text-anchor="middle">La imagen original no está disponible</text>' +
                 '</svg>';
             var placeholderUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(placeholderSVG);
 
             var imageOverlay = L.imageOverlay(placeholderUrl, bounds, {
-                opacity: 0.95,
+                opacity: imageOverlayOpacity,
                 interactive: true,
                 zIndex: 500
             }).addTo(map);
@@ -278,7 +307,7 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
                 imageOverlay._image.style.zIndex = '500';
             }
 
-            var closeButton = L.control({ position: 'topright' });
+            var closeButton = L.control({ position: 'bottomright' });
             closeButton.onAdd = function(map) {
                 var div = L.DomUtil.create('div', 'close-overlay-btn');
                 var closeBtn = L.DomUtil.create('button', 'close-btn', div);
@@ -304,15 +333,19 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
             };
             closeButton.addTo(map);
 
-            alert('No se encontró la imagen original para este polígono en GitHub. Se muestra un marcador de posición.');
+            alert('No se encontró la imagen original para este polígono . Se muestra un marcador de posición.');
             return;
         }
 
         var testPath = pathsToTry[pathIndex];
+        if (!isRenderableImage(testPath)) {
+            return tryLoadImage(pathIndex + 1);
+        }
+
         var img = new Image();
         img.onload = function() {
             var imageOverlay = L.imageOverlay(testPath, bounds, {
-                opacity: 1.0,
+                opacity: imageOverlayOpacity,
                 interactive: true,
                 zIndex: 500
             }).addTo(map);
@@ -322,7 +355,7 @@ function showImageOverlay(imagePath, bounds, properties, originalName) {
                 imageOverlay._image.style.zIndex = '500';
             }
 
-            var closeButton = L.control({ position: 'topright' });
+            var closeButton = L.control({ position: 'bottomright' });
             closeButton.onAdd = function(map) {
                 var div = L.DomUtil.create('div', 'close-overlay-btn');
                 var closeBtn = L.DomUtil.create('button', 'close-btn', div);
